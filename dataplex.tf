@@ -201,6 +201,12 @@ resource "google_dataplex_datascan" "dq_scan" {
   location     = var.region
   data_scan_id = "thelook-ecommerce-orders"
 
+# ADDED THIS BLOCK TO FIX THE BUILD FAILURE:
+labels = {
+    for k, v in var.labels : 
+    (startswith(k, "goog-") ? replace(k, "goog-", "cv-") : k) => v
+  }
+
   data {
     resource = "//bigquery.googleapis.com/projects/${module.project-services.project_id}/datasets/${local.datascan_dataset}/tables/thelook_ecommerce_orders"
   }
