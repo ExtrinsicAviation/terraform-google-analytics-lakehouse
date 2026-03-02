@@ -201,6 +201,12 @@ resource "google_dataplex_datascan" "dq_scan" {
   location     = var.region
   data_scan_id = "thelook-ecommerce-orders"
 
+  # Rename labels starting with 'goog-' to 'cv-' to bypass API restrictions
+  labels = {
+    for k, v in var.labels : 
+    (startswith(k, "goog-") ? replace(k, "goog-", "cv-") : k) => v
+  }
+
   data {
     resource = "//bigquery.googleapis.com/projects/${module.project-services.project_id}/datasets/${local.datascan_dataset}/tables/thelook_ecommerce_orders"
   }
@@ -220,7 +226,6 @@ resource "google_dataplex_datascan" "dq_scan" {
       threshold   = 1.0
       non_null_expectation {}
     }
-
     rules {
       column      = "user_id"
       dimension   = "COMPLETENESS"
@@ -229,7 +234,6 @@ resource "google_dataplex_datascan" "dq_scan" {
       threshold   = 1.0
       non_null_expectation {}
     }
-
     rules {
       column      = "created_at"
       dimension   = "COMPLETENESS"
@@ -238,7 +242,6 @@ resource "google_dataplex_datascan" "dq_scan" {
       threshold   = 1.0
       non_null_expectation {}
     }
-
     rules {
       column      = "order_id"
       dimension   = "UNIQUENESS"
@@ -246,7 +249,6 @@ resource "google_dataplex_datascan" "dq_scan" {
       description = "Sample rule for values in a set"
       uniqueness_expectation {}
     }
-
     rules {
       column      = "status"
       dimension   = "VALIDITY"
@@ -257,7 +259,6 @@ resource "google_dataplex_datascan" "dq_scan" {
         values = ["Shipped", "Complete", "Processing", "Cancelled", "Returned"]
       }
     }
-
     rules {
       column      = "num_of_item"
       dimension   = "VALIDITY"
@@ -271,7 +272,6 @@ resource "google_dataplex_datascan" "dq_scan" {
         strict_min_enabled = false
       }
     }
-
     rules {
       dimension   = "VALIDITY"
       name        = "non-empty-table"
